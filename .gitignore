@@ -1,0 +1,27 @@
+# Ignore environment files
+.env
+**/.env
+
+# Ignore node_modules in web and backend
+web/node_modules/
+backend/node_modules/
+node_modules/
+
+# Python-related ignores
+__pycache__/
+*.py[cod]
+*.pyo
+.mypy_cache/
+.pytest_cache/
+.venv/
+env/
+venv/
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+*.swp

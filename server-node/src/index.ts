@@ -52,6 +52,9 @@ app.get('/api/chatStream', async (req, res) => {
       // Send message to client
       res.write(`data: ${JSON.stringify({ message })}\n\n`);
     }
+
+    // Send an 'end' event when the stream is finished
+    res.write('event: end\n\n');
   } catch (error) {
     console.error('Error with streaming:', error);
     res.status(500).send('Error occurred');

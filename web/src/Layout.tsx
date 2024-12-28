@@ -21,6 +21,7 @@ import {
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useThemeStore } from './store/themeStore';
+import { useTheme } from '@mui/material/styles';
 
 const DRAWER_WIDTH = 280;
 
@@ -33,6 +34,7 @@ export default function Layout({ children }: LayoutProps) {
   const [drawerOpen, setDrawerOpen] = useState(true); // New state for drawer open/close
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useThemeStore();
+  const theme = useTheme();
 
   const menuItems = [
     { text: 'Chat', icon: <Chat />, path: '/' },
@@ -67,7 +69,13 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
-      <AppBar position='fixed'>
+      <AppBar
+        position='fixed'
+        sx={{
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+        }}
+      >
         <Toolbar>
           <IconButton
             color='inherit'

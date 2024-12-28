@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { TextField, IconButton, Box } from '@mui/material';
 import { Send } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -12,6 +13,7 @@ export default function ChatInput({
   disabled = false,
 }: ChatInputProps) {
   const [message, setMessage] = useState('');
+  const theme = useTheme();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +33,7 @@ export default function ChatInput({
         p: 2,
         borderTop: 1,
         borderColor: 'divider',
+        backgroundColor: theme.palette.background.paper, // Adjust background color for dark mode
       }}
     >
       <TextField
@@ -41,7 +44,20 @@ export default function ChatInput({
         disabled={disabled}
         multiline
         maxRows={4}
-        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 2,
+            backgroundColor: theme.palette.background.default, // Adjust input background color for dark mode
+            color: theme.palette.text.primary, // Adjust text color for dark mode
+          },
+          '& .MuiOutlinedInput-input': {
+            color: theme.palette.text.primary, // Ensure text color is visible in dark mode
+          },
+          '& .MuiInputBase-input::placeholder': {
+            color: theme.palette.text.secondary, // Ensure placeholder text color is visible in dark mode
+            opacity: 1, // Override default opacity
+          },
+        }}
       />
       <IconButton
         type='submit'

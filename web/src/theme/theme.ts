@@ -1,63 +1,66 @@
 import { createTheme } from '@mui/material/styles';
+import colors from './colors';
 
-export const lightTheme = createTheme({
+const lightTheme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#10a37f',
-      light: '#1abc9c',
-      dark: '#008c67',
+      main: colors.primary,
+      contrastText: '#000000', // Black text for primary color
+    },
+    secondary: {
+      main: colors.secondary,
+      contrastText: '#000000', // Black text for secondary color
     },
     background: {
-      default: '#ffffff',
-      paper: '#f7f7f8',
+      default: '#ffffff', // White background for a clean look
+      paper: '#f5f5f5', // Light grey background for paper components
     },
     text: {
-      primary: '#2c3e50',
-      secondary: '#34495e',
+      primary: '#000000', // Black text for primary content
+      secondary: '#333333', // Dark grey text for secondary content
     },
   },
-  typography: {
-    fontFamily: '"Söhne", "Helvetica Neue", "Arial", sans-serif',
-    fontSize: 16,
-    h1: {
-      fontSize: '2rem',
-      fontWeight: 600,
-    },
-    body1: {
-      fontSize: '1rem',
-      lineHeight: 1.75,
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+        code {
+          color: #000000;
+        }
+      `,
     },
   },
 });
 
-export const darkTheme = createTheme({
+const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#10a37f',
-      light: '#1abc9c',
-      dark: '#008c67',
+      main: colors.primary,
+      contrastText: '#ffffff', // White text for primary color
+    },
+    secondary: {
+      main: colors.secondary,
+      contrastText: '#ffffff', // White text for secondary color
     },
     background: {
-      default: '#343541',
-      paper: '#444654',
+      default: '#333333', // Dark grey background for a modern look
+      paper: '#424242', // Dark background for paper components
     },
     text: {
-      primary: '#ececf1',
-      secondary: '#d1d5db',
+      primary: '#ffffff', // White text for primary content
+      secondary: '#aaaaaa', // Light grey text for secondary content
     },
   },
-  typography: {
-    fontFamily: '"Söhne", "Helvetica Neue", "Arial", sans-serif',
-    fontSize: 16,
-    h1: {
-      fontSize: '2rem',
-      fontWeight: 600,
-    },
-    body1: {
-      fontSize: '1rem',
-      lineHeight: 1.75,
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+        code {
+          color: #ffffff;
+        }
+      `,
     },
   },
 });
+
+export { lightTheme, darkTheme };

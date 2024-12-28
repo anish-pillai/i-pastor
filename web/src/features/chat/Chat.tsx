@@ -72,7 +72,7 @@ export default function Chat() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 16 }}>
+      <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 5 }}>
         {messages.map((message) => (
           <ChatMessage
             key={message.id}

@@ -39,7 +39,7 @@ export default function ChatMessage({ message, isUser }: ChatMessageProps) {
       {isUser ? (
         <Box
           sx={{
-            maxWidth: '80%',
+            maxWidth: '90%',
             pt: 0,
             pb: 0,
             pl: 2,
@@ -54,7 +54,7 @@ export default function ChatMessage({ message, isUser }: ChatMessageProps) {
       ) : (
         <Paper
           sx={{
-            maxWidth: '80%',
+            maxWidth: '90%',
             pt: 0,
             pb: 0,
             pl: 2,

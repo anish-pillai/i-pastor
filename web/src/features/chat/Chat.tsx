@@ -29,7 +29,7 @@ export default function Chat() {
     setIsLoading(true);
 
     const eventSource = new EventSource(
-      `http://localhost:4500/api/chatStream?prompt=${content}`
+      `${process.env.REACT_APP_API_URL}/chatStream?prompt=${content}`
     );
 
     let combinedMessage = '';

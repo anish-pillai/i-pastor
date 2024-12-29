@@ -2,16 +2,16 @@ import 'reflect-metadata';
 import express, { Application, Request, Response, NextFunction } from 'express';
 
 import { createConnection } from 'typeorm';
-import { User } from './entity/User';
 import { OpenAI } from 'openai';
 import cors from 'cors';
 
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 
-import { Message } from './entity/Message'; // Import Message entity
-import { Chat } from './entity/Chat'; // Import Chat entity
-import { ChatHistory } from './entity/ChatHistory'; // Import ChatHistory entity
+import { User } from './entity/User';
+import { Message } from './entity/Message';
+import { Chat } from './entity/Chat';
+import { ChatHistory } from './entity/ChatHistory';
 
 dotenv.config();
 const app: Application = express();
@@ -49,7 +49,7 @@ createConnection({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   entities: [User, Message, Chat, ChatHistory],
-  synchronize: false, // Set synchronize to false
+  synchronize: false,
   logging: false,
 })
   .then(async (connection) => {
@@ -142,6 +142,21 @@ createConnection({
       } finally {
         clearInterval(heartbeat); // Clear the heartbeat interval
         res.end(); // End the response when done
+      }
+    });
+
+    app.get('/api/user/:id', async (req, res) => {
+      const userId = req.params.id;
+      try {
+        const user = await User.findOne({ where: { login: userId } });
+        if (user) {
+          res.json(user);
+        } else {
+          res.status(404).json({ error: 'User not found' });
+        }
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
       }
     });
 

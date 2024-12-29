@@ -4,6 +4,7 @@ import { lightTheme, darkTheme } from './theme/theme';
 import { useThemeStore } from './store/themeStore';
 import Layout from './Layout';
 import AppRoutes from './routes';
+import { UserProvider } from './context/UserContext';
 
 function App() {
   const isDarkMode = useThemeStore((state) => state.isDarkMode);
@@ -13,9 +14,11 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
-        <Layout>
-          <AppRoutes />
-        </Layout>
+        <UserProvider>
+          <Layout>
+            <AppRoutes />
+          </Layout>
+        </UserProvider>
       </BrowserRouter>
     </ThemeProvider>
   );

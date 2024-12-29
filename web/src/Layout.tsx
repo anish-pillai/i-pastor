@@ -9,6 +9,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Divider,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -22,6 +23,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useThemeStore } from './store/themeStore';
 import { useTheme } from '@mui/material/styles';
+import { useUser } from './context/UserContext'; // Import useUser
 
 const DRAWER_WIDTH = 280;
 
@@ -31,10 +33,11 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(true); // New state for drawer open/close
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useThemeStore();
   const theme = useTheme();
+  const { user } = useUser(); // Get user from useUser hook
 
   const menuItems = [
     { text: 'Chat', icon: <Chat />, path: '/' },
@@ -43,11 +46,11 @@ export default function Layout({ children }: LayoutProps) {
   ];
 
   const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen); // Toggle drawer open/close state
+    setDrawerOpen(!drawerOpen);
   };
 
   const drawer = (
-    <Box>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Toolbar />
       <List>
         {menuItems.map((item) => (
@@ -64,6 +67,12 @@ export default function Layout({ children }: LayoutProps) {
           </ListItem>
         ))}
       </List>
+      <Divider sx={{ mt: 'auto' }} />
+      <Box sx={{ p: 2 }}>
+        <Typography variant='body2'>Logged in as:</Typography>
+        <Typography variant='h6'>{user?.name}</Typography>{' '}
+        {/* Display user name */}
+      </Box>
     </Box>
   );
 
@@ -98,9 +107,9 @@ export default function Layout({ children }: LayoutProps) {
         sx={{
           width: { sm: drawerOpen ? DRAWER_WIDTH : 0 },
           flexShrink: { sm: 0 },
-          mt: 8, // Add margin top to place drawer below AppBar
-          position: 'fixed', // Fix the drawer position
-          top: 64, // Adjust top position to be below AppBar
+          mt: 8,
+          position: 'fixed',
+          top: 64,
         }}
       >
         <Drawer
@@ -140,7 +149,7 @@ export default function Layout({ children }: LayoutProps) {
           width: { sm: `calc(100% - ${drawerOpen ? DRAWER_WIDTH : 0}px)` },
           ml: { sm: drawerOpen ? `${DRAWER_WIDTH}px` : 0 },
           mt: 8,
-          overflow: 'auto', // Ensure content is scrollable within the main area
+          overflow: 'auto',
         }}
       >
         {children}

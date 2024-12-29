@@ -1,13 +1,40 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-@Entity()
+@Entity('user')
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  login!: string;
 
   @Column()
-  role: string;
+  name!: string;
+
+  @Column()
+  email!: string;
+
+  @Column()
+  role!: string;
+
+  @Column()
+  password!: string;
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => "'2024-12-28 00:00:00'",
+  })
+  createdAt!: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => "'2024-12-28 00:00:00'",
+  })
+  updatedAt!: Date;
 }

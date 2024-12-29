@@ -9,6 +9,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 
+import { Message } from './entity/Message'; // Import Message entity
+import { Chat } from './entity/Chat'; // Import Chat entity
+import { ChatHistory } from './entity/ChatHistory'; // Import ChatHistory entity
+
 dotenv.config();
 const app: Application = express();
 const port = process.env.PORT;
@@ -36,54 +40,119 @@ app.use(
   })
 );
 
-app.get('/api/chatStream', async (req, res) => {
-  const prompt = req.query.prompt as string;
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
+// Initialize database connection
+createConnection({
+  type: 'postgres',
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  entities: [User, Message, Chat, ChatHistory],
+  synchronize: false, // Set synchronize to false
+  logging: false,
+})
+  .then(async (connection) => {
+    console.log('Connected to the database');
 
-  // Send a heartbeat every 15 seconds to keep the connection alive
-  const heartbeat = setInterval(() => {
-    res.write(': heartbeat\n\n');
-  }, 15000);
-
-  try {
-    const stream = await openai.chat.completions.create({
-      model: 'gpt-4',
-      messages: [
-        {
-          role: 'system',
-          content: SYSTEM_PROMPT,
-        },
-        { role: 'user', content: prompt },
-      ],
-      stream: true,
+    app.post('/api/message', async (req: Request, res: Response) => {
+      const { prompt, response, totalCost, totalTokens, userId, chatId } =
+        req.body;
+      try {
+        const message = new Message();
+        message.prompt = prompt;
+        message.response = response;
+        message.totalCost = totalCost;
+        message.totalTokens = totalTokens;
+        message.userId = userId;
+        message.chatId = chatId;
+        await message.save();
+        res.status(201).send(message);
+      } catch (error) {
+        console.error('Error saving message:', error);
+        res.status(500).send('Error saving message');
+      }
     });
 
-    // Use the stream to send data to the client
-    for await (const chunk of stream) {
-      const message = chunk.choices[0]?.delta.content || '';
-      // Send message to client
-      res.write(`data: ${JSON.stringify({ message })}\n\n`);
-    }
+    app.get('/api/message', async (req: Request, res: Response) => {
+      try {
+        const messages = await Message.find();
+        res.status(200).send(messages);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(500).send('Error fetching messages');
+      }
+    });
 
-    // Send an 'end' event when the stream is finished
-    res.write('event: end\n\n');
-  } catch (error) {
-    console.error('Error with streaming:', error);
-    res.status(500).send('Error occurred');
-  } finally {
-    clearInterval(heartbeat); // Clear the heartbeat interval
-    res.end(); // End the response when done
-  }
-});
+    app.get('/api/chatStream', async (req, res) => {
+      const prompt = req.query.prompt as string;
+      const userId = req.query.userId as string;
+      const chatId = req.query.chatId as string;
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
 
-// Error handling middleware
-app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-  console.error('Error Middleware:', error);
-  res.status(500).send('Server error');
-});
+      // Send a heartbeat every 15 seconds to keep the connection alive
+      const heartbeat = setInterval(() => {
+        res.write(': heartbeat\n\n');
+      }, 15000);
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+      try {
+        const stream = await openai.chat.completions.create({
+          model: 'gpt-4',
+          messages: [
+            {
+              role: 'system',
+              content: SYSTEM_PROMPT,
+            },
+            { role: 'user', content: prompt },
+          ],
+          stream: true,
+        });
+
+        let fullResponse = '';
+        let totalTokens = 0;
+        let totalCost = 0;
+
+        // Use the stream to send data to the client
+        for await (const chunk of stream) {
+          const message = chunk.choices[0]?.delta.content || '';
+          fullResponse += message;
+          totalTokens += chunk.usage?.total_tokens || 0;
+          totalCost += chunk.usage?.total_tokens || 0; // Update property name to total_tokens
+          // Send message to client
+          res.write(`data: ${JSON.stringify({ message })}\n\n`);
+        }
+
+        // Save the full conversation to the database
+        const message = new Message();
+        message.prompt = prompt;
+        message.response = fullResponse;
+        message.totalTokens = totalTokens;
+        message.totalCost = totalCost;
+        message.userId = Number(userId);
+        message.chatId = Number(chatId);
+        await message.save();
+
+        // Send an 'end' event when the stream is finished
+        res.write('event: end\n\n');
+      } catch (error) {
+        console.error('Error with streaming:', error);
+        res.status(500).send('Error occurred');
+      } finally {
+        clearInterval(heartbeat); // Clear the heartbeat interval
+        res.end(); // End the response when done
+      }
+    });
+
+    // Error handling middleware
+    app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+      console.error('Error Middleware:', error);
+      res.status(500).send('Server error');
+    });
+
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+  })
+  .catch((error) => console.error('Database connection error:', error));

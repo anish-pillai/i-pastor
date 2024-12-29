@@ -6,7 +6,9 @@
         "esModuleInterop": true, // Ensure compatibility with ES modules
         "skipLibCheck": true, // Skip type checking for third-party libraries
         "outDir": "./dist", // Output directory for compiled JS files
-        "rootDir": "./src" // Source directory for TypeScript files
+        "rootDir": "./src", // Source directory for TypeScript files
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true
     },
     "include": [
         "src/**/*"

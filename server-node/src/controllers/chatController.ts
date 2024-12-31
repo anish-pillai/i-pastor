@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { Chat } from '../entity/Chat'; // Assuming you have a Chat model
-import { ChatHistory } from '../entity/ChatHistory'; // Assuming you have a ChatHistory model
+import { Chat } from '../db/entity/Chat'; // Assuming you have a Chat model
+import { ChatHistory } from '../db/entity/ChatHistory'; // Assuming you have a ChatHistory model
 
 export const createChat = async (req: Request, res: Response) => {
   try {
@@ -36,10 +36,7 @@ export const getChatById = async (req: Request, res: Response) => {
 
 export const updateChat = async (req: Request, res: Response) => {
   try {
-    const updateResult = await Chat.update(
-      { id: parseInt(req.params.id, 10) },
-      req.body
-    );
+    const updateResult = await Chat.update({ id: req.params.id }, req.body);
     if (updateResult.affected && updateResult.affected > 0) {
       const updatedChat = await Chat.findOne({ where: { id: req.params.id } });
       res.status(200).json(updatedChat);

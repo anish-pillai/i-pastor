@@ -5,6 +5,7 @@ import { useThemeStore } from './store/themeStore';
 import Layout from './Layout';
 import AppRoutes from './routes';
 import { UserProvider } from './context/UserContext';
+import { ChatProvider } from './context/ChatContext';
 
 function App() {
   const isDarkMode = useThemeStore((state) => state.isDarkMode);
@@ -15,9 +16,11 @@ function App() {
       <CssBaseline />
       <BrowserRouter>
         <UserProvider>
-          <Layout>
-            <AppRoutes />
-          </Layout>
+          <ChatProvider>
+            <Layout>
+              <AppRoutes />
+            </Layout>
+          </ChatProvider>
         </UserProvider>
       </BrowserRouter>
     </ThemeProvider>

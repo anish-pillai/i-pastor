@@ -5,26 +5,29 @@ import {
   BaseEntity,
   ManyToOne,
   JoinColumn,
-  OneToMany,
 } from 'typeorm';
 import { User } from './User';
-import { Message } from './Message';
+import { Chat } from './Chat';
 
 @Entity()
-export class Chat extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id!: number;
+export class ChatHistory extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.chatHistories)
   @JoinColumn({ name: 'userId' })
   user!: User;
 
   @Column()
-  userId!: number;
+  userId!: string;
 
-  @OneToMany(() => Message, (message) => message.chat)
-  messages!: Message[];
+  @ManyToOne(() => Chat)
+  @JoinColumn({ name: 'chatId' })
+  chat!: Chat;
+
+  @Column()
+  chatId!: string;
 }

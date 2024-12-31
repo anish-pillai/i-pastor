@@ -1,26 +1,24 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateChatTable1735344000100 implements MigrationInterface {
+export class CreateChatHistoryTable1735344000300 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'chat',
+        name: 'chat_history',
         columns: [
           {
             name: 'id',
-            type: 'int',
+            type: 'uuid',
             isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
+            isGenerated: false,
+            default: 'uuid_generate_v4()',
           },
+          { name: 'userId', type: 'uuid', isNullable: false },
+          { name: 'chatId', type: 'uuid', isNullable: false },
           {
             name: 'createdAt',
             type: 'timestamp',
             default: 'CURRENT_TIMESTAMP',
-          },
-          {
-            name: 'userId',
-            type: 'int',
           },
         ],
         foreignKeys: [
@@ -28,7 +26,11 @@ export class CreateChatTable1735344000100 implements MigrationInterface {
             columnNames: ['userId'],
             referencedTableName: 'user',
             referencedColumnNames: ['id'],
-            onDelete: 'CASCADE',
+          },
+          {
+            columnNames: ['chatId'],
+            referencedTableName: 'chat',
+            referencedColumnNames: ['id'],
           },
         ],
       })
@@ -36,6 +38,6 @@ export class CreateChatTable1735344000100 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('chat');
+    await queryRunner.dropTable('chat_history');
   }
 }

@@ -8,38 +8,18 @@ export class CreateUserTable1735344000000 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'int',
+            type: 'uuid',
             isPrimary: true,
-            isGenerated: true,
-            generationStrategy: 'increment',
+            isGenerated: false,
+            default: 'uuid_generate_v4()',
           },
-          {
-            name: 'login',
-            type: 'varchar',
-            isUnique: true,
-            isNullable: false,
-          },
-          {
-            name: 'name',
-            type: 'varchar',
-            isNullable: false,
-          },
-          {
-            name: 'email',
-            type: 'varchar',
-            isUnique: true,
-            isNullable: false,
-          },
-          {
-            name: 'role',
-            type: 'varchar',
-            isNullable: false,
-          },
-          {
-            name: 'password',
-            type: 'varchar',
-            isNullable: false,
-          },
+          { name: 'login', type: 'varchar', isUnique: true, isNullable: false },
+          { name: 'name', type: 'varchar', isNullable: false },
+          { name: 'email', type: 'varchar', isUnique: true, isNullable: false },
+          { name: 'role', type: 'varchar', isNullable: false },
+          { name: 'password', type: 'varchar', isNullable: false },
+          { name: 'isActive', type: 'boolean', default: true },
+          { name: 'lastLogin', type: 'timestamp', isNullable: true },
           {
             name: 'createdAt',
             type: 'timestamp',
@@ -51,8 +31,7 @@ export class CreateUserTable1735344000000 implements MigrationInterface {
             default: 'CURRENT_TIMESTAMP',
           },
         ],
-      }),
-      true
+      })
     );
   }
 

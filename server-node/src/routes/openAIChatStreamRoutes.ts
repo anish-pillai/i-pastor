@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { OpenAI } from 'openai';
-import { Message } from '../entity/Message';
+import { Message } from '../db/entity/Message';
 import { SYSTEM_PROMPT } from '../constants';
 
 const router = Router();
@@ -51,8 +51,8 @@ router.get('/', async (req, res) => {
     message.response = fullResponse;
     message.totalTokens = totalTokens;
     message.totalCost = totalCost;
-    message.userId = Number(userId);
-    message.chatId = Number(chatId);
+    message.userId = userId;
+    message.chatId = chatId;
     await message.save();
 
     res.write('event: end\n\n');

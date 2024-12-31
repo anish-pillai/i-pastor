@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ChatHistory } from '../entity/ChatHistory'; // Assuming you have a ChatHistory model
+import { ChatHistory } from '../db/entity/ChatHistory'; // Assuming you have a ChatHistory model
 
 export const createChatHistory = async (req: Request, res: Response) => {
   try {
@@ -37,7 +37,7 @@ export const getChatHistoryById = async (req: Request, res: Response) => {
 export const updateChatHistory = async (req: Request, res: Response) => {
   try {
     const updateResult = await ChatHistory.update(
-      { id: parseInt(req.params.id, 10) },
+      { id: req.params.id },
       req.body
     );
     if (updateResult.affected && updateResult.affected > 0) {

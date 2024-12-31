@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { User } from '../entity/User';
+import { User } from '../db/entity/User';
 
 const router = Router();
 

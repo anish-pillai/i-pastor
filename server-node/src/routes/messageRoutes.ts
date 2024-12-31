@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Message } from '../entity/Message';
+import { Message } from '../db/entity/Message';
 
 const router = Router();
 

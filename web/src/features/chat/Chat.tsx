@@ -3,6 +3,7 @@ import { Box, TextField, Button, useTheme } from '@mui/material';
 import { ChatMessage } from '../../components';
 import { Message } from './types';
 import { v4 as uuidv4 } from 'uuid';
+import { useChat } from '../../context/ChatContext'; // Import useChat
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -10,6 +11,7 @@ export default function Chat() {
   const [inputValue, setInputValue] = useState('');
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const theme = useTheme();
+  const { createChat, createChatHistory, createMessage } = useChat(); // Use the chat context
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -28,46 +30,60 @@ export default function Chat() {
     setMessages((prev) => [...prev, newMessage]);
     setIsLoading(true);
 
-    const eventSource = new EventSource(
-      `${process.env.REACT_APP_API_URL}/chatStream?prompt=${content}`
-    );
+    try {
+      // Create a new chat entry
+      const chat = await createChat({ content });
 
-    let combinedMessage = '';
+      // Create a new chat history entry
+      await createChatHistory({ chatId: chat.id, content });
 
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      combinedMessage += data.message;
+      // Create a new message entry
+      await createMessage({ chatId: chat.id, content, isUser: true });
 
-      // Update the state with the combined message
-      setMessages((prev) => {
-        const lastMessage = prev[prev.length - 1];
-        if (lastMessage && !lastMessage.isUser) {
-          return [
-            ...prev.slice(0, -1),
-            { ...lastMessage, content: combinedMessage },
-          ];
-        } else {
-          return [
-            ...prev,
-            { id: uuidv4(), content: combinedMessage, isUser: false },
-          ];
-        }
+      const eventSource = new EventSource(
+        `${process.env.REACT_APP_API_URL}/chatStream?prompt=${content}`
+      );
+
+      let combinedMessage = '';
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        combinedMessage += data.message;
+
+        // Update the state with the combined message
+        setMessages((prev) => {
+          const lastMessage = prev[prev.length - 1];
+          if (lastMessage && !lastMessage.isUser) {
+            return [
+              ...prev.slice(0, -1),
+              { ...lastMessage, content: combinedMessage },
+            ];
+          } else {
+            return [
+              ...prev,
+              { id: uuidv4(), content: combinedMessage, isUser: false },
+            ];
+          }
+        });
+      };
+
+      eventSource.onerror = () => {
+        eventSource.close();
+        setIsLoading(false);
+      };
+
+      eventSource.onopen = () => {
+        setIsLoading(false);
+      };
+
+      eventSource.addEventListener('end', () => {
+        eventSource.close();
+        setIsLoading(false);
       });
-    };
-
-    eventSource.onerror = () => {
-      eventSource.close();
+    } catch (error) {
+      console.error('Failed to send message', error);
       setIsLoading(false);
-    };
-
-    eventSource.onopen = () => {
-      setIsLoading(false);
-    };
-
-    eventSource.addEventListener('end', () => {
-      eventSource.close();
-      setIsLoading(false);
-    });
+    }
   };
 
   return (

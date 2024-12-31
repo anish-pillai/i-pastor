@@ -22,12 +22,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const loggedInUser = 'john_doe'; // Hardcoded for now
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/user/bob123`
+          `${process.env.REACT_APP_API_URL}/user/${loggedInUser}`
         );
         setUser(response.data);
       } catch (err) {

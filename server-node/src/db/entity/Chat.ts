@@ -7,25 +7,36 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BaseEntity,
+  JoinColumn,
 } from 'typeorm';
 import { ChatHistory } from './ChatHistory';
 import { Message } from './Message';
+import { User } from './User';
 
 @Entity()
 export class Chat extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @ManyToOne(() => ChatHistory, (chatHistory) => chatHistory.chats, {
-    onDelete: 'CASCADE',
-  })
-  chatHistory!: ChatHistory;
+  @ManyToOne(() => User, (user) => user.chats, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user!: User;
+
+  @OneToMany(() => ChatHistory, (chatHistory) => chatHistory.chat)
+  chatHistories!: ChatHistory[];
 
   @Column()
-  topic!: string;
+  title!: string;
+
+  @Column({ nullable: true })
+  description?: string;
 
   @OneToMany(() => Message, (message) => message.chat)
   messages!: Message[];
+
+  @ManyToOne(() => ChatHistory, { nullable: true })
+  @JoinColumn({ name: 'chatHistoryId' })
+  chatHistory?: ChatHistory;
 
   @CreateDateColumn()
   createdAt!: Date;

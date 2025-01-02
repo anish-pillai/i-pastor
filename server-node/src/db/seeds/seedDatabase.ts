@@ -8,26 +8,39 @@ export const seedDatabase = async (dataSource: DataSource) => {
   console.log('Seeding the database...');
 
   const userRepo = dataSource.getRepository(User);
-  const chatHistoryRepo = dataSource.getRepository(ChatHistory);
-  const chatRepo = dataSource.getRepository(Chat);
-  const messageRepo = dataSource.getRepository(Message);
 
   // Create Users
   const adminUser = userRepo.create({
-    name: 'Admin User',
-    email: 'admin@example.com',
+    name: 'John Doe',
+    email: 'john.doe@mailsac.com',
     role: 'admin',
     status: 'active',
   });
   await userRepo.save(adminUser);
 
   const regularUser = userRepo.create({
-    name: 'Regular User',
-    email: 'user@example.com',
+    name: 'Jane Doe',
+    email: 'jane.doe@mailsac.com',
     role: 'user',
     status: 'active',
   });
   await userRepo.save(regularUser);
+
+  // Create Chat Histories, Chats, and Messages
+  // Pass seed as true to seed the data
+  dataTablesSeed(dataSource, false, adminUser);
+
+  console.log('Seed data inserted successfully!');
+};
+
+const dataTablesSeed = async (
+  dataSource: DataSource,
+  seed: boolean,
+  adminUser: any
+) => {
+  const chatHistoryRepo = dataSource.getRepository(ChatHistory);
+  const chatRepo = dataSource.getRepository(Chat);
+  const messageRepo = dataSource.getRepository(Message);
 
   // Create Chat Histories
   const chatHistory1 = chatHistoryRepo.create({
@@ -37,7 +50,7 @@ export const seedDatabase = async (dataSource: DataSource) => {
   await chatHistoryRepo.save(chatHistory1);
 
   const chatHistory2 = chatHistoryRepo.create({
-    user: regularUser,
+    user: adminUser,
     deleted: false,
   });
   await chatHistoryRepo.save(chatHistory2);
@@ -45,13 +58,13 @@ export const seedDatabase = async (dataSource: DataSource) => {
   // Create Chats
   const chat1 = chatRepo.create({
     chatHistory: chatHistory1,
-    topic: 'Admin Chat Topic 1',
+    title: 'Admin Chat Topic 1',
   });
   await chatRepo.save(chat1);
 
   const chat2 = chatRepo.create({
     chatHistory: chatHistory2,
-    topic: 'User Chat Topic 2',
+    title: 'User Chat Topic 2',
   });
   await chatRepo.save(chat2);
 
@@ -73,6 +86,4 @@ export const seedDatabase = async (dataSource: DataSource) => {
     totalCost: 10,
   });
   await messageRepo.save(message2);
-
-  console.log('Seed data inserted successfully!');
 };

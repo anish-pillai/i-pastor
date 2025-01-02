@@ -8,6 +8,7 @@ import {
   BaseEntity,
 } from 'typeorm';
 import { ChatHistory } from './ChatHistory';
+import { Chat } from './Chat';
 
 @Entity()
 export class User extends BaseEntity {
@@ -37,4 +38,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => ChatHistory, (chatHistory) => chatHistory.user)
   chatHistories!: ChatHistory[];
+
+  @OneToMany(() => Chat, (chat) => chat.user)
+  chats!: Chat[];
 }

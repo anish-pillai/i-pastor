@@ -2,7 +2,7 @@ import { createContext, useContext, ReactNode } from 'react';
 import axios from 'axios';
 
 interface CreateChatData {
-  topic: string;
+  title: string;
 }
 
 interface CreateChatHistoryData {

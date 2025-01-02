@@ -28,7 +28,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     const fetchUser = async () => {
       try {
         // Replace with the hardcoded user ID
-        const hardcodedUserEmail = 'admin@example.com'; // Replace '1' with an actual user ID from your database
+        const hardcodedUserEmail = 'john.doe@mailsac.com';
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/user/${hardcodedUserEmail}`
         );

@@ -44,7 +44,7 @@ export default function Chat() {
 
       // Create a chat if none exists
       if (!currentChatId) {
-        const chat = await createChat({ topic: 'New Chat' });
+        const chat = await createChat({ title: 'New Chat' });
         currentChatId = chat.id;
         setChatId(currentChatId);
 

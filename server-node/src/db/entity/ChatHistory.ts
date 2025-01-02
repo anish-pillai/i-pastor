@@ -1,13 +1,13 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
-  ManyToOne,
-  OneToMany,
   Column,
+  ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
   BaseEntity,
+  JoinColumn,
 } from 'typeorm';
 import { User } from './User';
 import { Chat } from './Chat';
@@ -18,10 +18,12 @@ export class ChatHistory extends BaseEntity {
   id!: string;
 
   @ManyToOne(() => User, (user) => user.chatHistories, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
   user!: User;
 
-  @OneToMany(() => Chat, (chat) => chat.chatHistory)
-  chats!: Chat[];
+  @ManyToOne(() => Chat, (chat) => chat.chatHistories, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'chatId' })
+  chat!: Chat;
 
   @Column({ default: false })
   deleted!: boolean;

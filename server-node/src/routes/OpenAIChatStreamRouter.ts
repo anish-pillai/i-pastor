@@ -2,6 +2,7 @@ import { AppDataSource } from '../data-source';
 import { Router } from 'express';
 import { OpenAI } from 'openai';
 import { Message } from '../db/entity/Message';
+import { Chat } from '../db/entity/Chat'; // Import the Chat entity
 import { SYSTEM_PROMPT } from '../constants';
 import { encode } from 'gpt-3-encoder'; // Import the encoder
 
@@ -51,13 +52,22 @@ router.get('/', async (req, res) => {
     }
 
     const messageRepository = AppDataSource.getRepository(Message);
+    const chatRepository = AppDataSource.getRepository(Chat); // Get the Chat repository
+
+    // Find the chat by chatId
+    const chat = await chatRepository.findOne({ where: { id: chatId } });
+
+    if (!chat) {
+      throw new Error('Chat not found');
+    }
+
     let message = await messageRepository.findOne({
       where: { chat: { id: chatId }, prompt },
     });
 
     if (!message) {
       message = new Message();
-      message.chat = { id: chatId } as any; // Assuming chatId is sufficient to set the relation
+      message.chat = chat; // Set the chat relation
       message.prompt = prompt;
     }
 

@@ -55,7 +55,7 @@ Reset the Schema
 
 [First time Only] Generate the initial migration scripts
 
-`npm run typeorm migration:generate -- ./migrations/InitialSchema -d src/data-source.ts`
+`npm run typeorm migration:generate -- src/db/migration/InitialSchema -d src/data-source.ts`
 
 ## Running the Application
 

@@ -26,7 +26,7 @@ export class Message extends BaseEntity {
   @Column({ type: 'int', default: 0 })
   totalTokens!: number;
 
-  @Column({ type: 'numeric', default: 0 })
+  @Column({ type: 'numeric', precision: 10, scale: 4, default: 0 }) // Adjust precision and scale as needed
   totalCost!: number;
 
   @CreateDateColumn()

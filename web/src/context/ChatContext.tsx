@@ -14,8 +14,6 @@ interface CreateMessageData {
   chatId: string;
   prompt: string;
   response: string;
-  totalTokens: number;
-  totalCost?: number;
 }
 
 interface ChatContextProps {

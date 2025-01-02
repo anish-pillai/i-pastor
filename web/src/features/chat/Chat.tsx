@@ -54,19 +54,6 @@ export default function Chat() {
         }
       }
 
-      // Save the user's message
-      if (currentChatId) {
-        await createMessage({
-          chatId: currentChatId,
-          prompt: content,
-          response: content,
-          totalTokens: 0,
-          totalCost: 0,
-        });
-      } else {
-        console.error('Chat ID is null');
-      }
-
       // Open an EventSource for real-time chat streaming
       const eventSource = new EventSource(
         `${process.env.REACT_APP_API_URL}/chatStream?prompt=${content}`
@@ -93,6 +80,17 @@ export default function Chat() {
           }
         });
       };
+
+      // Save the user's message
+      if (currentChatId) {
+        await createMessage({
+          chatId: currentChatId,
+          prompt: content,
+          response: combinedMessage,
+        });
+      } else {
+        console.error('Chat ID is null');
+      }
 
       eventSource.onerror = () => {
         console.error('Error with EventSource');

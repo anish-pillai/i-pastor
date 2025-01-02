@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { OpenAI } from 'openai';
 import { Message } from '../db/entity/Message';
 import { SYSTEM_PROMPT } from '../constants';
+import { encode } from 'gpt-3-encoder'; // Import the encoder
 
 const router = Router();
 
@@ -36,23 +37,34 @@ router.get('/', async (req, res) => {
     });
 
     let fullResponse = '';
-    let totalTokens = 0;
+    let totalTokens = encode(prompt).length; // Calculate tokens for the prompt
     let totalCost = 0;
+    const costPerToken = 0.02; // Example cost per token, adjust as needed based on OpenAI pricing
 
     for await (const chunk of stream) {
       const message = chunk.choices[0]?.delta.content || '';
       fullResponse += message;
-      totalTokens += chunk.usage?.total_tokens || 0;
-      totalCost += chunk.usage?.total_tokens || 0;
+      const tokens = encode(message).length; // Calculate tokens for the response
+      totalTokens += tokens;
+      totalCost += tokens * costPerToken;
       res.write(`data: ${JSON.stringify({ message })}\n\n`);
     }
 
-    const message = new Message();
-    message.prompt = prompt;
+    const messageRepository = AppDataSource.getRepository(Message);
+    let message = await messageRepository.findOne({
+      where: { chat: { id: chatId }, prompt },
+    });
+
+    if (!message) {
+      message = new Message();
+      message.chat = { id: chatId } as any; // Assuming chatId is sufficient to set the relation
+      message.prompt = prompt;
+    }
+
     message.response = fullResponse;
     message.totalTokens = totalTokens;
     message.totalCost = totalCost;
-    const messageRepository = AppDataSource.getRepository(Message);
+
     await messageRepository.save(message);
 
     res.write('event: end\n\n');

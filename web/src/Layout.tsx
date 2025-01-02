@@ -99,7 +99,6 @@ export default function Layout({ children }: LayoutProps) {
               ? `${DRAWER_WIDTH}px`
               : `${COLLAPSED_DRAWER_WIDTH}px`,
           },
-          mt: 8,
           overflow: 'auto',
         }}
       >

@@ -32,6 +32,7 @@ export class Chat extends BaseEntity {
   description?: string;
 
   @OneToMany(() => Message, (message) => message.chat)
+  @JoinColumn({ name: 'id' }) // Ensure the join column is correctly set
   messages!: Message[];
 
   @ManyToOne(() => ChatHistory, { nullable: true })

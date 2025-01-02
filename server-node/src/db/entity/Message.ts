@@ -18,6 +18,9 @@ export class Message extends BaseEntity {
   chat!: Chat;
 
   @Column()
+  chatId!: string; // Add this line to ensure chatId gets populated
+
+  @Column()
   prompt!: string;
 
   @Column({ nullable: true })

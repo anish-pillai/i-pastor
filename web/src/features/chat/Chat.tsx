@@ -3,7 +3,8 @@ import { Box, TextField, Button, useTheme } from '@mui/material';
 import { ChatMessage } from '../../components';
 import { Message } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { useChat } from '../../context/ChatContext'; // Import useChat
+import { useChat } from '../../context/ChatContext';
+import { useUser } from '../../context/UserContext';
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -11,8 +12,12 @@ export default function Chat() {
   const [inputValue, setInputValue] = useState('');
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const theme = useTheme();
-  const { createChat, createChatHistory, createMessage } = useChat(); // Use the chat context
+  const { createChat, createChatHistory, createMessage } = useChat();
+  const { user } = useUser();
+  const userId = user?.id;
+  const [chatId, setChatId] = useState<string | null>(null);
 
+  // Auto-scroll to the latest message
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -20,26 +25,49 @@ export default function Chat() {
   }, [messages]);
 
   const handleSendMessage = async (content: string) => {
+    if (!userId) {
+      console.error('User not logged in or userId is missing');
+      return;
+    }
+
     const newMessage: Message = {
-      id: uuidv4(), // Use uuid to generate unique ID
+      id: uuidv4(),
       content,
       isUser: true,
     };
 
-    // Add the user's message to the state
     setMessages((prev) => [...prev, newMessage]);
     setIsLoading(true);
 
     try {
-      // Create a new chat entry
-      const chat = await createChat({ content });
+      let currentChatId = chatId;
 
-      // Create a new chat history entry
-      await createChatHistory({ chatId: chat.id, content });
+      // Create a chat if none exists
+      if (!currentChatId) {
+        const chat = await createChat({ topic: 'New Chat' });
+        currentChatId = chat.id;
+        setChatId(currentChatId);
 
-      // Create a new message entry
-      await createMessage({ chatId: chat.id, content, isUser: true });
+        // Create chat history for the new chat
+        if (currentChatId) {
+          await createChatHistory({ chatId: currentChatId, userId });
+        }
+      }
 
+      // Save the user's message
+      if (currentChatId) {
+        await createMessage({
+          chatId: currentChatId,
+          prompt: content,
+          response: content,
+          totalTokens: 0,
+          totalCost: 0,
+        });
+      } else {
+        console.error('Chat ID is null');
+      }
+
+      // Open an EventSource for real-time chat streaming
       const eventSource = new EventSource(
         `${process.env.REACT_APP_API_URL}/chatStream?prompt=${content}`
       );
@@ -50,7 +78,6 @@ export default function Chat() {
         const data = JSON.parse(event.data);
         combinedMessage += data.message;
 
-        // Update the state with the combined message
         setMessages((prev) => {
           const lastMessage = prev[prev.length - 1];
           if (lastMessage && !lastMessage.isUser) {
@@ -68,11 +95,8 @@ export default function Chat() {
       };
 
       eventSource.onerror = () => {
+        console.error('Error with EventSource');
         eventSource.close();
-        setIsLoading(false);
-      };
-
-      eventSource.onopen = () => {
         setIsLoading(false);
       };
 
@@ -88,7 +112,7 @@ export default function Chat() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 5 }}>
+      <Box sx={{ flexGrow: 1, overflowY: 'auto', padding: 2 }}>
         {messages.map((message) => (
           <ChatMessage
             key={message.id}
@@ -116,8 +140,8 @@ export default function Chat() {
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && inputValue.trim()) {
-              e.preventDefault(); // Prevent default form submission
-              handleSendMessage(inputValue);
+              e.preventDefault();
+              handleSendMessage(inputValue.trim());
               setInputValue('');
             }
           }}
@@ -127,7 +151,7 @@ export default function Chat() {
           color='primary'
           sx={{ marginLeft: 2 }}
           onClick={() => {
-            handleSendMessage(inputValue);
+            handleSendMessage(inputValue.trim());
             setInputValue('');
           }}
           disabled={isLoading || !inputValue.trim()}

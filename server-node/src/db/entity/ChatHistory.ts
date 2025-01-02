@@ -1,10 +1,13 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
-  Column,
-  BaseEntity,
   ManyToOne,
-  JoinColumn,
+  OneToMany,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  BaseEntity,
 } from 'typeorm';
 import { User } from './User';
 import { Chat } from './Chat';
@@ -14,20 +17,21 @@ export class ChatHistory extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt!: Date;
-
-  @ManyToOne(() => User, (user) => user.chatHistories)
-  @JoinColumn({ name: 'userId' })
+  @ManyToOne(() => User, (user) => user.chatHistories, { onDelete: 'CASCADE' })
   user!: User;
 
-  @Column()
-  userId!: string;
+  @OneToMany(() => Chat, (chat) => chat.chatHistory)
+  chats!: Chat[];
 
-  @ManyToOne(() => Chat)
-  @JoinColumn({ name: 'chatId' })
-  chat!: Chat;
+  @Column({ default: false })
+  deleted!: boolean;
 
-  @Column()
-  chatId!: string;
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
 }

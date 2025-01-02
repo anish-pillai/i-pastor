@@ -2,10 +2,11 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  BaseEntity,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BaseEntity,
 } from 'typeorm';
-import { Chat } from './Chat';
 import { ChatHistory } from './ChatHistory';
 
 @Entity()
@@ -14,34 +15,25 @@ export class User extends BaseEntity {
   id!: string;
 
   @Column({ unique: true })
-  login!: string;
+  email!: string;
 
   @Column()
   name!: string;
 
-  @Column({ unique: true })
-  email!: string;
-
   @Column()
   role!: string;
-
-  @Column()
-  password!: string;
-
-  @Column({ default: true })
-  isActive!: boolean;
 
   @Column({ type: 'timestamp', nullable: true })
   lastLogin!: Date | null;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ default: 'active' })
+  status!: 'active' | 'inactive';
+
+  @CreateDateColumn()
   createdAt!: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn()
   updatedAt!: Date;
-
-  @OneToMany(() => Chat, (chat) => chat.user)
-  chats!: Chat[];
 
   @OneToMany(() => ChatHistory, (chatHistory) => chatHistory.user)
   chatHistories!: ChatHistory[];

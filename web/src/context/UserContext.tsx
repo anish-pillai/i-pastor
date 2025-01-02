@@ -22,12 +22,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const loggedInUser = 'john_doe'; // Hardcoded for now
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        // Replace with the hardcoded user ID
+        const hardcodedUserEmail = 'admin@example.com'; // Replace '1' with an actual user ID from your database
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/user/${loggedInUser}`
+          `${process.env.REACT_APP_API_URL}/user/${hardcodedUserEmail}`
         );
         setUser(response.data);
       } catch (err) {

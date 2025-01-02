@@ -10,6 +10,7 @@
     "migration:run": "npm run typeorm -- -d src/data-source.ts migration:run",
     "migration:revert": "npm run typeorm -- -d src/data-source.ts migration:revert",
     "migration:show": "npm run typeorm -- -d src/data-source.ts migration:show",
+    "schema:drop": "npm run typeorm -- -d src/data-source.ts schema:drop",
     "db:seed": "ts-node src/db/scripts/seed.ts",
     "db:init": "npm run migration:run && npm run db:seed"
   },

@@ -1,9 +1,9 @@
 import { Application } from 'express';
-import { messageRoutes } from './messageRoutes';
-import { openAIChatStreamRoutes } from './openAIChatStreamRoutes';
-import { userRoutes } from './userRoutes';
-import { chatRoutes } from './chatRoutes';
-import { chatHistoryRoutes } from './chatHistoryRoutes';
+import { openAIChatStreamRoutes } from './OpenAIChatStreamRouter';
+import { userRoutes } from './UserRouter';
+import { chatHistoryRoutes } from './ChatHistoryRouter';
+import { messageRoutes } from './MessageRouter';
+import { chatRoutes } from './ChatRouter';
 
 export const initializeRoutes = (app: Application) => {
   app.use('/api/message', messageRoutes);

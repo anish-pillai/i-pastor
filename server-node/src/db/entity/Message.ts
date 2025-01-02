@@ -2,47 +2,36 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  BaseEntity,
   ManyToOne,
-  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BaseEntity,
 } from 'typeorm';
 import { Chat } from './Chat';
-import { User } from './User';
 
 @Entity()
 export class Message extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'text', nullable: true })
-  prompt!: string;
-
-  @Column({ type: 'text', nullable: true })
-  response!: string;
-
-  @Column({ type: 'numeric', nullable: true })
-  totalCost!: number;
-
-  @Column({ type: 'int', nullable: true })
-  totalTokens!: number;
-
-  @Column({ default: false })
-  isRead!: boolean;
-
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  createdAt!: Date;
-
-  @ManyToOne(() => Chat, (chat) => chat.messages)
-  @JoinColumn({ name: 'chatId' })
+  @ManyToOne(() => Chat, (chat) => chat.messages, { onDelete: 'CASCADE' })
   chat!: Chat;
 
   @Column()
-  chatId!: string;
+  prompt!: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
-  user!: User;
+  @Column({ nullable: true })
+  response?: string;
 
-  @Column()
-  userId!: string;
+  @Column({ type: 'int', default: 0 })
+  totalTokens!: number;
+
+  @Column({ type: 'numeric', default: 0 })
+  totalCost!: number;
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }

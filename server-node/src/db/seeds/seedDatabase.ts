@@ -1,77 +1,78 @@
 import { DataSource } from 'typeorm';
 import { User } from '../entity/User';
+import { ChatHistory } from '../entity/ChatHistory';
 import { Chat } from '../entity/Chat';
 import { Message } from '../entity/Message';
-import { ChatHistory } from '../entity/ChatHistory';
 
 export const seedDatabase = async (dataSource: DataSource) => {
   console.log('Seeding the database...');
+
   const userRepo = dataSource.getRepository(User);
+  const chatHistoryRepo = dataSource.getRepository(ChatHistory);
   const chatRepo = dataSource.getRepository(Chat);
   const messageRepo = dataSource.getRepository(Message);
-  const chatHistoryRepo = dataSource.getRepository(ChatHistory);
 
   // Create Users
-  const user1 = userRepo.create({
-    login: 'john_doe',
-    name: 'John Doe',
-    email: 'john@example.com',
+  const adminUser = userRepo.create({
+    name: 'Admin User',
+    email: 'admin@example.com',
     role: 'admin',
-    password: 'password123',
+    status: 'active',
   });
-  await userRepo.save(user1);
+  await userRepo.save(adminUser);
 
-  const user2 = userRepo.create({
-    login: 'jane_doe',
-    name: 'Jane Doe',
-    email: 'jane@example.com',
+  const regularUser = userRepo.create({
+    name: 'Regular User',
+    email: 'user@example.com',
     role: 'user',
-    password: 'password456',
+    status: 'active',
   });
-  await userRepo.save(user2);
+  await userRepo.save(regularUser);
+
+  // Create Chat Histories
+  const chatHistory1 = chatHistoryRepo.create({
+    user: adminUser,
+    deleted: false,
+  });
+  await chatHistoryRepo.save(chatHistory1);
+
+  const chatHistory2 = chatHistoryRepo.create({
+    user: regularUser,
+    deleted: false,
+  });
+  await chatHistoryRepo.save(chatHistory2);
 
   // Create Chats
   const chat1 = chatRepo.create({
-    userId: user1.id,
-    topic: 'General Discussion',
+    chatHistory: chatHistory1,
+    topic: 'Admin Chat Topic 1',
   });
   await chatRepo.save(chat1);
 
   const chat2 = chatRepo.create({
-    userId: user2.id,
-    topic: 'Support',
+    chatHistory: chatHistory2,
+    topic: 'User Chat Topic 2',
   });
   await chatRepo.save(chat2);
 
   // Create Messages
   const message1 = messageRepo.create({
-    chatId: chat1.id,
-    userId: user1.id,
-    prompt: 'Hello, how can I help you?',
-    response: 'I need assistance with my account.',
+    chat: chat1,
+    prompt: 'How can I assist you today?',
+    response: 'I have a query about my admin account.',
+    totalTokens: 12,
+    totalCost: 12,
   });
   await messageRepo.save(message1);
 
   const message2 = messageRepo.create({
-    chatId: chat2.id,
-    userId: user2.id,
-    prompt: 'What is your issue?',
-    response: 'I cannot log in.',
+    chat: chat2,
+    prompt: 'Hello, can you help me?',
+    response: 'Yes, what do you need assistance with?',
+    totalTokens: 10,
+    totalCost: 10,
   });
   await messageRepo.save(message2);
-
-  // Create Chat History
-  const chatHistory1 = chatHistoryRepo.create({
-    userId: user1.id,
-    chatId: chat1.id,
-  });
-  await chatHistoryRepo.save(chatHistory1);
-
-  const chatHistory2 = chatHistoryRepo.create({
-    userId: user2.id,
-    chatId: chat2.id,
-  });
-  await chatHistoryRepo.save(chatHistory2);
 
   console.log('Seed data inserted successfully!');
 };

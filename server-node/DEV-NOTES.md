@@ -4,7 +4,7 @@
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/your-repo/i-pastor.git
+    git clone https://github.com/anish-pillai/i-pastor.git
     cd i-pastor/server-node
     ```
 
@@ -30,7 +30,16 @@ Check Migration Status
 
 `npm run migration:show`
 
-Expected result:
+Expected result(Result may vary):
+
+```
+    [ ] CreateUserTable1735344000000
+    [ ] CreateChatTable1735344000100
+    [ ] CreateMessageTable1735344000200
+    [ ] CreateChatHistoryTable1735344000300
+    [ ] UpdateSchemaToDecoupleMessage1735344000400
+    [ ] UpdateSchemaToDecoupleMessage1735766856581
+```
 
 Apply Migrations
 
@@ -39,6 +48,14 @@ Apply Migrations
 Seed the Database
 
 `npm run db:seed`
+
+Reset the Schema
+
+`npm run schema:drop`
+
+[First time Only] Generate the initial migration scripts
+
+`npm run typeorm migration:generate -- ./migrations/InitialSchema -d src/data-source.ts`
 
 ## Running the Application
 

@@ -1,31 +1,11 @@
-import express, { Router } from 'express';
-import passport from 'passport';
-import session from 'express-session';
+import { Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
-import './GoogleAuth'; // Import Google strategy configuration
 import { User } from '../db/entity/User';
 import { AppDataSource } from '../data-source';
-const authRouter: Router = express.Router();
+
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-/**
- * Generate Session Secret [SESSION_SECRET]
- * node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
- */
-// Use sessions for maintaining login state
-authRouter.use(
-  session({
-    secret: process.env.SESSION_SECRET!,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
-
-authRouter.use(passport.initialize());
-authRouter.use(passport.session());
-
-// POST route to verify Google token
-authRouter.post('/google/verify', async (req, res) => {
+export const verifyGoogleToken = async (req: Request, res: Response) => {
   const { token, provider, authToken } = req.body;
 
   if (!provider) {
@@ -79,31 +59,12 @@ authRouter.post('/google/verify', async (req, res) => {
     console.error('Token verification failed:', error);
     res.status(401).json({ message: 'Invalid token' });
   }
-});
+};
 
-// Route to trigger Google OAuth
-authRouter.get(
-  '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
-
-// Callback route for Google OAuth
-authRouter.get(
-  '/google/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
-  (req, res) => {
-    // Successful login
-    res.redirect('/'); // Redirect to a dashboard or home page
-  }
-);
-
-// Route to get authenticated user info
-authRouter.get('/user', (req, res) => {
+export const getUserInfo = (req: Request, res: Response) => {
   if (req.isAuthenticated()) {
     res.json(req.user);
   } else {
     res.status(401).json({ message: 'Unauthorized' });
   }
-});
-
-export default authRouter;
+};

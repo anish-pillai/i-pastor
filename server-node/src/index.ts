@@ -8,7 +8,7 @@ import bodyParser from 'body-parser';
 import { AppDataSource } from './data-source';
 import { initializeRoutes } from './routes';
 import { errorHandler } from './middlewares/errorHandler';
-import authRouter from './auth';
+import authRouter from './routes/AuthRouter';
 
 const app: Application = express();
 const port = process.env.PORT;

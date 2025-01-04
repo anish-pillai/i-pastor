@@ -3,27 +3,35 @@ import { BrowserRouter } from 'react-router-dom';
 import { lightTheme, darkTheme } from './theme/theme';
 import { useThemeStore } from './store/themeStore';
 import Layout from './Layout';
-import AppRoutes from './routes';
+import { AppRoutes } from './routes';
 import { UserProvider } from './context/UserContext';
 import { ChatProvider } from './context/ChatContext';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { AuthProvider } from './context/AuthContext';
+
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID as string;
 
 function App() {
   const isDarkMode = useThemeStore((state) => state.isDarkMode);
   const theme = isDarkMode ? darkTheme : lightTheme;
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <UserProvider>
-          <ChatProvider>
-            <Layout>
-              <AppRoutes />
-            </Layout>
-          </ChatProvider>
-        </UserProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+    <GoogleOAuthProvider clientId={clientId}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
+          <AuthProvider>
+            <UserProvider>
+              <ChatProvider>
+                <Layout>
+                  <AppRoutes />
+                </Layout>
+              </ChatProvider>
+            </UserProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </ThemeProvider>
+    </GoogleOAuthProvider>
   );
 }
 

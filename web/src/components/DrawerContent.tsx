@@ -14,7 +14,7 @@ import { ReactNode } from 'react';
 import { NavigateFunction } from 'react-router-dom';
 import { Menu as MenuIcon, DarkMode, LightMode } from '@mui/icons-material';
 import { useThemeStore } from '../store/themeStore';
-
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 interface MenuItem {
   text: string;
   icon: ReactNode;
@@ -44,7 +44,7 @@ const DrawerContent = ({
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Toolbar>
         <IconButton color='inherit' edge='start' onClick={handleDrawerToggle}>
-          <MenuIcon />
+          <MenuOpenIcon />
         </IconButton>
         {drawerOpen && (
           <Typography variant='h6' noWrap component='div' sx={{ ml: 1 }}>

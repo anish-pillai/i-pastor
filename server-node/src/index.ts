@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import dotenv from 'dotenv'; // Import dotenv at the top
-dotenv.config(); // Ensure this is called at the very beginning
+import dotenv from 'dotenv';
+dotenv.config(); // Load environment variables
 
 import express, { Application } from 'express';
 import cors from 'cors';
@@ -8,6 +8,7 @@ import bodyParser from 'body-parser';
 import { AppDataSource } from './data-source';
 import { initializeRoutes } from './routes';
 import { errorHandler } from './middlewares/errorHandler';
+import authRouter from './auth';
 
 const app: Application = express();
 const port = process.env.PORT;
@@ -19,6 +20,9 @@ app.use(
     credentials: true,
   })
 );
+
+// Register auth routes
+app.use('/auth', authRouter);
 
 AppDataSource.initialize()
   .then(async () => {

@@ -24,6 +24,15 @@ export class User extends BaseEntity {
   @Column()
   role!: string;
 
+  @Column({ unique: true })
+  providerId!: string; // Unique ID from the social provider (Google, GitHub, Facebook, etc.)
+
+  @Column()
+  provider!: string; // Name of the provider (e.g., 'google', 'github', 'facebook')
+
+  @Column()
+  picture!: string;
+
   @Column({ type: 'timestamp', nullable: true })
   lastLogin!: Date | null;
 

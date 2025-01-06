@@ -1,11 +1,14 @@
 import React from 'react';
-import AuthButtons from './AuthButtons';
+// import AuthButtons from './AuthButtons';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const apiUrl = process.env.REACT_APP_AUTH_URL;
 const SignIn: React.FC = () => {
   const { login } = useAuth();
+  const navigate = useNavigate();
+
   const handleGoogleSignIn = (credentialResponse: CredentialResponse) => {
     if (credentialResponse.credential) {
       fetch(`${apiUrl}/google/verify`, {
@@ -23,6 +26,7 @@ const SignIn: React.FC = () => {
           console.log('User data from backend:', data);
           const { authToken } = data;
           login(authToken);
+          navigate('/');
         })
         .catch((error) => {
           console.error('Error during Google Sign-In:', error);
@@ -30,18 +34,19 @@ const SignIn: React.FC = () => {
     }
   };
 
-  const handleGitHubSignIn = () => {
-    // Handle GitHub sign-in
-  };
+  // const handleGitHubSignIn = () => {
+  //   // Handle GitHub sign-in
+  // };
 
-  const handleFacebookSignIn = () => {
-    // Handle Facebook sign-in
-  };
+  // const handleFacebookSignIn = () => {
+  //   // Handle Facebook sign-in
+  // };
 
   return (
     <GoogleLogin
       onSuccess={handleGoogleSignIn}
       onError={() => console.error('Login Failed')}
+      auto_select={true}
     />
     // <AuthButtons
     //   title='Sign In'

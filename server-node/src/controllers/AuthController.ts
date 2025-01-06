@@ -60,11 +60,3 @@ export const verifyGoogleToken = async (req: Request, res: Response) => {
     res.status(401).json({ message: 'Invalid token' });
   }
 };
-
-export const getUserInfo = (req: Request, res: Response) => {
-  if (req.isAuthenticated()) {
-    res.json(req.user);
-  } else {
-    res.status(401).json({ message: 'Unauthorized' });
-  }
-};

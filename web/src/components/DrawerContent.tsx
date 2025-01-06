@@ -9,20 +9,23 @@ import {
   Typography,
   IconButton,
   Avatar,
+  Menu,
+  MenuItem,
 } from '@mui/material';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { NavigateFunction } from 'react-router-dom';
-import { Menu as MenuIcon, DarkMode, LightMode } from '@mui/icons-material';
+import { DarkMode, LightMode } from '@mui/icons-material';
 import { useThemeStore } from '../store/themeStore';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-interface MenuItem {
+import { useAuth } from '../context/AuthContext';
+interface MenuItemProps {
   text: string;
   icon: ReactNode;
   path: string;
 }
 
 interface DrawerContentProps {
-  menuItems: MenuItem[];
+  menuItems: MenuItemProps[];
   navigate: NavigateFunction;
   setMobileOpen: (open: boolean) => void;
   user: { name: string; profilePic: string } | null;
@@ -39,6 +42,28 @@ const DrawerContent = ({
   handleDrawerToggle,
 }: DrawerContentProps) => {
   const { isDarkMode, toggleTheme } = useThemeStore();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const { logout } = useAuth();
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleProfile = () => {
+    navigate('/profile');
+    handleClose();
+  };
+
+  const handleLogout = () => {
+    // Add your logout logic here
+    logout();
+    handleClose();
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -74,7 +99,10 @@ const DrawerContent = ({
           {isDarkMode ? <LightMode /> : <DarkMode />}
         </IconButton>
       </Box>
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
+      <Box
+        sx={{ p: 2, display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+        onClick={handleClick}
+      >
         <Avatar src={user?.profilePic} alt={user?.name} />
         {drawerOpen && (
           <Box sx={{ ml: 2 }}>
@@ -83,6 +111,10 @@ const DrawerContent = ({
           </Box>
         )}
       </Box>
+      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+        <MenuItem onClick={handleProfile}>Profile</MenuItem>
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      </Menu>
     </Box>
   );
 };

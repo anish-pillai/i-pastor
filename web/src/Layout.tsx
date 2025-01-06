@@ -2,11 +2,11 @@ import { Box, Drawer } from '@mui/material';
 import { Chat, Language, Upload } from '@mui/icons-material';
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from './context/UserContext';
 import DrawerContent from './components/DrawerContent';
+import { useAuth } from './context/AuthContext';
 
 const DRAWER_WIDTH = 280;
-const COLLAPSED_DRAWER_WIDTH = 70;
+const COLLAPSED_DRAWER_WIDTH = 60;
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,9 +14,9 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { userInfo: user } = useAuth();
 
   const menuItems = [
     { text: 'Chat', icon: <Chat />, path: '/' },
@@ -69,7 +69,7 @@ export default function Layout({ children }: LayoutProps) {
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: drawerOpen ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
-              borderRadius: '0 10px 10px 0',
+              borderRadius: '0 30px 30px 0',
             },
           }}
           open

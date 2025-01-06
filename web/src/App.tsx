@@ -4,7 +4,6 @@ import { lightTheme, darkTheme } from './theme/theme';
 import { useThemeStore } from './store/themeStore';
 import Layout from './Layout';
 import { AppRoutes } from './routes';
-import { UserProvider } from './context/UserContext';
 import { ChatProvider } from './context/ChatContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext';
@@ -21,13 +20,11 @@ function App() {
         <CssBaseline />
         <BrowserRouter>
           <AuthProvider>
-            <UserProvider>
-              <ChatProvider>
-                <Layout>
-                  <AppRoutes />
-                </Layout>
-              </ChatProvider>
-            </UserProvider>
+            <ChatProvider>
+              <Layout>
+                <AppRoutes />
+              </Layout>
+            </ChatProvider>
           </AuthProvider>
         </BrowserRouter>
       </ThemeProvider>

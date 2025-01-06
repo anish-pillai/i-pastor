@@ -28,7 +28,7 @@ interface DrawerContentProps {
   menuItems: MenuItemProps[];
   navigate: NavigateFunction;
   setMobileOpen: (open: boolean) => void;
-  user: { name: string; profilePic: string } | null;
+  user: { name: string; picture: string } | null;
   drawerOpen: boolean;
   handleDrawerToggle: () => void;
 }
@@ -45,7 +45,7 @@ const DrawerContent = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const { logout } = useAuth();
-
+  const { name, picture } = user || { name: '', picture: '' };
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -94,20 +94,20 @@ const DrawerContent = ({
         ))}
       </List>
       <Divider sx={{ mt: 'auto' }} />
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 1 }}>
         <IconButton color='inherit' onClick={toggleTheme}>
           {isDarkMode ? <LightMode /> : <DarkMode />}
         </IconButton>
       </Box>
       <Box
-        sx={{ p: 2, display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+        sx={{ p: 1, display: 'flex', alignItems: 'center', cursor: 'pointer' }}
         onClick={handleClick}
       >
-        <Avatar src={user?.profilePic} alt={user?.name} />
+        <Avatar src={picture} alt={name} />
         {drawerOpen && (
           <Box sx={{ ml: 2 }}>
             <Typography variant='body2'>Logged in as:</Typography>
-            <Typography variant='h6'>{user?.name}</Typography>
+            <Typography variant='h6'>{name}</Typography>
           </Box>
         )}
       </Box>

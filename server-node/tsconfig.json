@@ -1,5 +1,9 @@
 {
     "compilerOptions": {
+        "typeRoots": [
+            "./node_modules/@types",
+            "./types"
+        ],
         "target": "ES6", // Target ECMAScript version
         "module": "commonjs", // Module system used by Node.js
         "strict": true, // Enable strict type checking
@@ -8,9 +12,10 @@
         "outDir": "./dist", // Output directory for compiled JS files
         "rootDir": "./src", // Source directory for TypeScript files
         "emitDecoratorMetadata": true,
-        "experimentalDecorators": true
+        "experimentalDecorators": true,
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "./types"
     ] // Files to include in the compilation
 }

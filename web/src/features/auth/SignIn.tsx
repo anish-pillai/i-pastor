@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 const apiUrl = process.env.REACT_APP_AUTH_URL;
 const SignIn: React.FC = () => {
-  const { login } = useAuth();
+  const { login, setUserInfo } = useAuth();
   const navigate = useNavigate();
 
   const handleGoogleSignIn = (credentialResponse: CredentialResponse) => {
@@ -24,8 +24,10 @@ const SignIn: React.FC = () => {
         .then((res) => res.json())
         .then((data) => {
           console.log('User data from backend:', data);
-          const { authToken } = data;
-          login(authToken);
+          const { token, user } = data;
+          login(token);
+          // Add the user data to the context
+          setUserInfo(user);
           navigate('/');
         })
         .catch((error) => {

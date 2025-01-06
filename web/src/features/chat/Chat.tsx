@@ -4,7 +4,7 @@ import { ChatMessage } from '../../components';
 import { Message } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { useChat } from '../../context/ChatContext';
-import { useUser } from '../../context/UserContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -13,9 +13,9 @@ export default function Chat() {
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const theme = useTheme();
   const { createChat, createChatHistory, createMessage } = useChat();
-  const { user } = useUser();
-  const userId = user?.id;
   const [chatId, setChatId] = useState<string | null>(null);
+  const { isAuthenticated, userInfo } = useAuth();
+  const { id: userId } = userInfo || {};
 
   // Auto-scroll to the latest message
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function Chat() {
   }, [messages]);
 
   const handleSendMessage = async (content: string) => {
-    if (!userId) {
+    if (!isAuthenticated) {
       console.error('User not logged in or userId is missing');
       return;
     }

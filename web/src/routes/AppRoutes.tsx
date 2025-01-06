@@ -6,6 +6,7 @@ import { WebSearch } from '../features/web-search';
 import SignIn from '../features/auth/SignIn';
 import SignUp from '../features/auth/SignUp';
 import PrivateRoute from '../components/PrivateRoute';
+import Profile from '../pages/Profile';
 
 export default function AppRoutes() {
   return (
@@ -19,6 +20,7 @@ export default function AppRoutes() {
         path='/web-search'
         element={<PrivateRoute element={<WebSearch />} />}
       />
+      <Route path='/profile' element={<PrivateRoute element={<Profile />} />} />
 
       <Route path='*' element={<Navigate to='/' />} />
     </Routes>

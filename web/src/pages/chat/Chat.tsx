@@ -2,10 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { Box, TextField, Button, useTheme } from '@mui/material';
 import { ChatMessage } from '../../components';
 import { Message } from './types';
-import { v4 as uuidv4 } from 'uuid';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import {
+  createNewMessage,
+  updateMessages,
+  createEventSource,
+} from '../../utils/chatUtils';
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -33,28 +37,16 @@ export default function Chat() {
       return;
     }
 
-    const newMessage = {
-      id: uuidv4(),
-      content,
-      isUser: true,
-    };
-
+    const newMessage = createNewMessage(content);
     setMessages((prev) => [...prev, newMessage]);
     setIsLoading(true);
 
     try {
       let currentChatId = chatId;
 
-      // Create a chat if none exists
       if (!currentChatId) {
-        const chat = await createChat({ title: 'New Chat' });
-        currentChatId = chat.id;
+        currentChatId = await initializeChat();
         setChatId(currentChatId);
-
-        // Create chat history for the new chat
-        if (currentChatId) {
-          await createChatHistory({ chatId: currentChatId, userId });
-        }
       }
 
       if (!authToken) {
@@ -62,76 +54,9 @@ export default function Chat() {
         return;
       }
 
-      // Open an EventSource for real-time chat streaming
-      const reader = await createEventSource(
-        `${process.env.REACT_APP_API_URL}/chatStream?prompt=${content}`,
-        authToken
-      );
-
-      const decoder = new TextDecoder('utf-8');
-      let buffer = '';
-      let combinedMessage = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        let boundary = buffer.indexOf('\n\n');
-        while (boundary !== -1) {
-          const eventString = buffer.slice(0, boundary);
-          buffer = buffer.slice(boundary + 2);
-          boundary = buffer.indexOf('\n\n');
-
-          try {
-            // Strip out the "data:" and "event:" prefixes
-            const cleanedEventString = eventString
-              .replace(/^data: /, '')
-              .replace(/^event: /, '');
-
-            // Check if the cleaned string is valid JSON
-            if (
-              cleanedEventString.trim().startsWith('{') &&
-              cleanedEventString.trim().endsWith('}')
-            ) {
-              const event = JSON.parse(cleanedEventString);
-              combinedMessage += event.message;
-
-              const updatedCombinedMessage = combinedMessage;
-              setMessages((prev) => {
-                const lastMessage = prev[prev.length - 1];
-                if (lastMessage && !lastMessage.isUser) {
-                  return [
-                    ...prev.slice(0, -1),
-                    { ...lastMessage, content: updatedCombinedMessage },
-                  ];
-                } else {
-                  return [
-                    ...prev,
-                    {
-                      id: uuidv4(),
-                      content: updatedCombinedMessage,
-                      isUser: false,
-                    },
-                  ];
-                }
-              });
-            } else {
-              console.warn('Received non-JSON data:', cleanedEventString);
-            }
-          } catch (error) {
-            console.error('Failed to parse event data', error);
-          }
-        }
-      }
-
-      // Save the user's message
+      const combinedMessage = await streamChatResponse(content, authToken);
       if (currentChatId) {
-        await createMessage({
-          chatId: currentChatId,
-          prompt: content,
-          response: combinedMessage,
-        });
+        await saveMessage(currentChatId, content, combinedMessage);
       } else {
         console.error('Chat ID is null');
       }
@@ -143,21 +68,77 @@ export default function Chat() {
     }
   };
 
-  const createEventSource = async (url: string, token: string) => {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  const initializeChat = async () => {
+    const chat = await createChat({ title: 'New Chat' });
+    const currentChatId = chat.id;
 
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+    if (currentChatId) {
+      await createChatHistory({ chatId: currentChatId, userId });
     }
 
-    if (!response.body) {
-      throw new Error('Response body is null');
+    return currentChatId;
+  };
+
+  const streamChatResponse = async (content: string, token: string) => {
+    const reader = await createEventSource(
+      `${process.env.REACT_APP_API_URL}/chatStream?prompt=${content}`,
+      token
+    );
+
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+    let combinedMessage = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let boundary = buffer.indexOf('\n\n');
+      while (boundary !== -1) {
+        const eventString = buffer.slice(0, boundary);
+        buffer = buffer.slice(boundary + 2);
+        boundary = buffer.indexOf('\n\n');
+
+        try {
+          const cleanedEventString = eventString
+            .replace(/^data: /, '')
+            .replace(/^event: /, '');
+
+          if (
+            cleanedEventString.trim().startsWith('{') &&
+            cleanedEventString.trim().endsWith('}')
+          ) {
+            const event = JSON.parse(cleanedEventString);
+            combinedMessage += event.message;
+
+            updateMessages(setMessages, combinedMessage);
+          } else {
+            console.warn('Received non-JSON data:', cleanedEventString);
+          }
+        } catch (error) {
+          console.error('Failed to parse event data', error);
+        }
+      }
     }
-    return response.body.getReader();
+
+    return combinedMessage;
+  };
+
+  const saveMessage = async (
+    chatId: string,
+    prompt: string,
+    response: string
+  ) => {
+    if (chatId) {
+      await createMessage({
+        chatId,
+        prompt,
+        response,
+      });
+    } else {
+      console.error('Chat ID is null');
+    }
   };
 
   return (

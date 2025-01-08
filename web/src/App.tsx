@@ -2,7 +2,6 @@ import { ThemeProvider, CssBaseline } from '@mui/material';
 import { BrowserRouter } from 'react-router-dom';
 import { lightTheme, darkTheme } from './theme/theme';
 import { useThemeStore } from './store/themeStore';
-import Layout from './Layout';
 import { AppRoutes } from './routes';
 import { ChatProvider } from './context/ChatContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -21,9 +20,7 @@ function App() {
         <BrowserRouter>
           <AuthProvider>
             <ChatProvider>
-              <Layout>
-                <AppRoutes />
-              </Layout>
+              <AppRoutes />
             </ChatProvider>
           </AuthProvider>
         </BrowserRouter>

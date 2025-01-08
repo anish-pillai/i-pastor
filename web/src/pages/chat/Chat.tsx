@@ -5,11 +5,14 @@ import { Message } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { useChat } from '../../context/ChatContext';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const navigate = useNavigate();
+
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const theme = useTheme();
   const { createChat, createChatHistory, createMessage } = useChat();
@@ -26,7 +29,7 @@ export default function Chat() {
 
   const handleSendMessage = async (content: string) => {
     if (!isAuthenticated) {
-      console.error('User not logged in or userId is missing');
+      navigate('/sign-in');
       return;
     }
 

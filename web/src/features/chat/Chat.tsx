@@ -14,7 +14,7 @@ export default function Chat() {
   const theme = useTheme();
   const { createChat, createChatHistory, createMessage } = useChat();
   const [chatId, setChatId] = useState<string | null>(null);
-  const { isAuthenticated, userInfo } = useAuth();
+  const { isAuthenticated, userInfo, authToken } = useAuth();
   const { id: userId } = userInfo || {};
 
   // Auto-scroll to the latest message
@@ -30,7 +30,7 @@ export default function Chat() {
       return;
     }
 
-    const newMessage: Message = {
+    const newMessage = {
       id: uuidv4(),
       content,
       isUser: true,
@@ -54,32 +54,73 @@ export default function Chat() {
         }
       }
 
+      if (!authToken) {
+        console.error('Auth token is missing');
+        return;
+      }
+
       // Open an EventSource for real-time chat streaming
-      const eventSource = new EventSource(
-        `${process.env.REACT_APP_API_URL}/chatStream?prompt=${content}`
+      const reader = await createEventSource(
+        `${process.env.REACT_APP_API_URL}/chatStream?prompt=${content}`,
+        authToken
       );
 
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
       let combinedMessage = '';
 
-      eventSource.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        combinedMessage += data.message;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
 
-        setMessages((prev) => {
-          const lastMessage = prev[prev.length - 1];
-          if (lastMessage && !lastMessage.isUser) {
-            return [
-              ...prev.slice(0, -1),
-              { ...lastMessage, content: combinedMessage },
-            ];
-          } else {
-            return [
-              ...prev,
-              { id: uuidv4(), content: combinedMessage, isUser: false },
-            ];
+        let boundary = buffer.indexOf('\n\n');
+        while (boundary !== -1) {
+          const eventString = buffer.slice(0, boundary);
+          buffer = buffer.slice(boundary + 2);
+          boundary = buffer.indexOf('\n\n');
+
+          try {
+            // Strip out the "data:" and "event:" prefixes
+            const cleanedEventString = eventString
+              .replace(/^data: /, '')
+              .replace(/^event: /, '');
+
+            // Check if the cleaned string is valid JSON
+            if (
+              cleanedEventString.trim().startsWith('{') &&
+              cleanedEventString.trim().endsWith('}')
+            ) {
+              const event = JSON.parse(cleanedEventString);
+              combinedMessage += event.message;
+
+              const updatedCombinedMessage = combinedMessage;
+              setMessages((prev) => {
+                const lastMessage = prev[prev.length - 1];
+                if (lastMessage && !lastMessage.isUser) {
+                  return [
+                    ...prev.slice(0, -1),
+                    { ...lastMessage, content: updatedCombinedMessage },
+                  ];
+                } else {
+                  return [
+                    ...prev,
+                    {
+                      id: uuidv4(),
+                      content: updatedCombinedMessage,
+                      isUser: false,
+                    },
+                  ];
+                }
+              });
+            } else {
+              console.warn('Received non-JSON data:', cleanedEventString);
+            }
+          } catch (error) {
+            console.error('Failed to parse event data', error);
           }
-        });
-      };
+        }
+      }
 
       // Save the user's message
       if (currentChatId) {
@@ -92,20 +133,28 @@ export default function Chat() {
         console.error('Chat ID is null');
       }
 
-      eventSource.onerror = () => {
-        console.error('Error with EventSource');
-        eventSource.close();
-        setIsLoading(false);
-      };
-
-      eventSource.addEventListener('end', () => {
-        eventSource.close();
-        setIsLoading(false);
-      });
+      setIsLoading(false);
     } catch (error) {
       console.error('Failed to send message', error);
       setIsLoading(false);
     }
+  };
+
+  const createEventSource = async (url: string, token: string) => {
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    if (!response.body) {
+      throw new Error('Response body is null');
+    }
+    return response.body.getReader();
   };
 
   return (

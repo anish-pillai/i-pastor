@@ -2,6 +2,7 @@
     "compilerOptions": {
         "typeRoots": [
             "./node_modules/@types",
+            "./src/types",
             "./types"
         ],
         "target": "ES6", // Target ECMAScript version
@@ -16,6 +17,7 @@
     },
     "include": [
         "src/**/*",
-        "./types"
+        "src/types/**/*",
+        "types/**/*"
     ] // Files to include in the compilation
 }

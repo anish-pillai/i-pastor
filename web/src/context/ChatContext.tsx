@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode } from 'react';
 import axios from 'axios';
+import { useAuth } from './AuthContext';
 
 interface CreateChatData {
   title: string;
@@ -26,6 +27,7 @@ const ChatContext = createContext<ChatContextProps | undefined>(undefined);
 
 export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const apiUrl = process.env.REACT_APP_API_URL;
+  const { authToken } = useAuth();
 
   if (!apiUrl) {
     throw new Error('REACT_APP_API_URL environment variable is not defined');
@@ -33,7 +35,11 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
 
   const apiCall = async <T,>(url: string, data: T): Promise<any> => {
     try {
-      const response = await axios.post(`${apiUrl}${url}`, data);
+      const response = await axios.post(`${apiUrl}${url}`, data, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
       return response.data;
     } catch (error) {
       console.error(`API call failed: ${error}`);
@@ -52,7 +58,11 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       ...data,
       chatId: data.chatId, // Ensure chatId is part of the payload
     };
-    const response = await axios.post(`${apiUrl}/message`, payload);
+    const response = await axios.post(`${apiUrl}/message`, payload, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
     return response.data;
   };
 

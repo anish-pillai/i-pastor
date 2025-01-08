@@ -1,3 +1,4 @@
+/// <reference path="../types/express.d.ts" />
 import 'reflect-metadata';
 import dotenv from 'dotenv';
 dotenv.config(); // Load environment variables
@@ -12,6 +13,13 @@ import authRouter from './routes/AuthRouter';
 
 const app: Application = express();
 const port = process.env.PORT;
+
+// Middleware to set COOP and COEP headers
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  next();
+});
 
 app.use(bodyParser.json());
 app.use(

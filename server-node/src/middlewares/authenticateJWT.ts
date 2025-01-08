@@ -1,3 +1,4 @@
+// filepath: /Users/anishpillai/Documents/GitHub/i-pastor/server-node/src/middlewares/authenticateJWT.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
@@ -6,13 +7,7 @@ export const authenticateJWT = (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Authorization token missing' });
-  }
-
-  const token = authHeader.split(' ')[1];
+  const token = req.header('Authorization')?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });

@@ -6,4 +6,4 @@ const router = Router({ mergeParams: true });
 router.post('/', createChat);
 router.get('/', getChats);
 
-export { router as chatRoutes };
+export { router as ChatRoutes };

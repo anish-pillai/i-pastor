@@ -49,3 +49,11 @@ id	int	Primary key.
 userId	int (FK)	References the user for whom the history is logged.
 chatId	int (FK)	References the chat session.
 createdAt	timestamp	Auto-generated timestamp for the history creation.
+
+CREATE USER myuser WITH PASSWORD 'mypassword';
+CREATE DATABASE mydb OWNER myuser;
+GRANT ALL PRIVILEGES ON DATABASE mydb TO myuser;
+
+CREATE USER i_pastor_admin WITH PASSWORD 'admin';
+CREATE DATABASE i_pastor OWNER i_pastor_admin;
+GRANT ALL PRIVILEGES ON DATABASE i_pastor TO i_pastor_admin;

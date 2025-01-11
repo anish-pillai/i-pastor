@@ -9,4 +9,4 @@ const router = express.Router();
 router.get('/', getChatHistories);
 router.post('/', createChatHistory);
 
-export { router as chatHistoryRoutes };
+export { router as ChatHistoryRoutes };

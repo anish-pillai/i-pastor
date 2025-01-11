@@ -1,0 +1,90 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-node:
+    name: Build and Deploy Node.js Server
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      # Add other environment variables from .env file if needed
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: |
+          cd server-node
+          npm install
+
+      - name: Build
+        run: |
+          cd server-node
+          npm run build
+
+      - name: Deploy
+        run: |
+          cd server-node
+          npm run deploy
+
+  build-python:
+    name: Build and Deploy Python Server
+    runs-on: ubuntu-latest
+    env:
+      # Add environment variables from .env file if needed
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          cd server-py
+          pip install -r requirements.txt
+
+      - name: Deploy
+        run: |
+          cd server-py
+          python deploy.py
+
+  build-react:
+    name: Build and Deploy React.js Project
+    runs-on: ubuntu-latest
+    env:
+      # Add environment variables from .env file if needed
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: |
+          cd web
+          npm install
+
+      - name: Build
+        run: |
+          cd web
+          npm run build
+
+      - name: Deploy
+        run: |
+          cd web
+          npm run deploy
